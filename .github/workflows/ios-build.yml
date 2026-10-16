@@ -1,0 +1,47 @@
+name: Build SafeLink Child iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Xcode
+        run: xcodebuild -version
+
+      - name: Build iOS app
+        run: |
+          xcodebuild \
+            -project SafeLinkChild.xcodeproj \
+            -target SafeLinkChild \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/SafeLinkChild.app build/Payload/
+          cd build
+          zip -qr SafeLinkChild-unsigned.ipa Payload
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SafeLinkChild-unsigned-ipa
+          path: build/SafeLinkChild-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
