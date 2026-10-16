@@ -24,9 +24,10 @@ jobs:
         run: |
           xcodebuild \
             -project SafeLinkChild.xcodeproj \
-            -target SafeLinkChild \
+            -scheme SafeLinkChild \
             -configuration Release \
             -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
@@ -36,7 +37,7 @@ jobs:
           mkdir -p build/Payload
           cp -R build/DerivedData/Build/Products/Release-iphoneos/SafeLinkChild.app build/Payload/
           cd build
-          zip -qr SafeLinkChild-unsigned.ipa Payload
+          /usr/bin/zip -qr SafeLinkChild-unsigned.ipa Payload
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
